@@ -1,0 +1,32 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# 环境变量与密钥
+.env
+.env.local
+*.pem
+
+# 上传文件（用户数据，不入库）
+uploads/
+!uploads/.gitkeep
+
+# 数据库迁移版本（保留目录结构）
+# migrations/versions/*.py
+
+# 运行时日志
+*.log
+instance/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store

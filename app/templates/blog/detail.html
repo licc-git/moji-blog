@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} · {{ site_name }}{% endblock %}
+
+{% block content %}
+<article class="row justify-content-center">
+  <div class="col-lg-8">
+
+    {# ===== 文章头部 ===== #}
+    <header class="article-header">
+      <h1>{{ post.title }}</h1>
+      <div class="article-meta">
+        {% if post.category %}
+        <span class="cat-badge {{ 'study' if post.category.name == '学习笔记' else 'daily' }}">
+          {{ post.category.name }}
+        </span>
+        {% endif %}
+        <span><i class="bi bi-calendar3"></i>
+          {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+        {% if post.updated_at and post.updated_at != post.created_at %}
+        <span><i class="bi bi-arrow-clockwise"></i>
+          更新于 {{ post.updated_at.strftime('%Y-%m-%d') }}</span>
+        {% endif %}
+        <span><i class="bi bi-eye"></i> {{ post.view_count }} 次阅读</span>
+      </div>
+
+      {% if post.tag_list %}
+      <div class="mt-2">
+        {% for tag in post.tag_list %}
+        <span class="tag-pill">#{{ tag }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </header>
+
+    {# ===== 操作栏 ===== #}
+    <div class="action-bar">
+      <a href="{{ url_for('blog.export', post_id=post.id) }}"
+         class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-download"></i> 导出 Markdown
+      </a>
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('blog.edit', post_id=post.id) }}"
+         class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-pencil"></i> 编辑
+      </a>
+      <button type="button" class="btn btn-outline-danger btn-sm"
+              data-bs-toggle="modal" data-bs-target="#deleteModal">
+        <i class="bi bi-trash"></i> 删除
+      </button>
+      {% endif %}
+      <a href="{{ url_for('blog.index') }}" class="btn btn-link btn-sm ms-auto">
+        <i class="bi bi-arrow-left"></i> 返回列表
+      </a>
+    </div>
+
+    {# ===== 正文 ===== #}
+    <div class="markdown-body">
+      {# content_html 已在保存时渲染并缓存，直接输出（已通过 Markdown 安全生成） #}
+      {{ post.content_html | safe }}
+    </div>
+
+    {# ===== 相关文章 ===== #}
+    {% if related %}
+    <section class="mt-5">
+      <h5 class="mb-3" style="font-family: var(--mo-serif);">
+        <i class="bi bi-bookmark"></i> 相关阅读
+      </h5>
+      <div class="row g-3">
+        {% for r in related %}
+        <div class="col-md-4">
+          <a href="{{ url_for('blog.detail', post_id=r.id) }}" class="related-card">
+            <div class="rel-title">{{ r.title }}</div>
+            <div class="rel-date">{{ r.created_at.strftime('%Y-%m-%d') }}</div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+  </div>
+</article>
+
+{# ===== 删除确认弹窗 ===== #}
+{% if current_user.is_authenticated %}
+<div class="modal fade" id="deleteModal" tabindex="-1"
+     aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">确认删除</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                aria-label="关闭"></button>
+      </div>
+      <div class="modal-body">
+        确定要删除文章「<strong>{{ post.title }}</strong>」吗？此操作不可恢复。
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">取消</button>
+        <form method="post" action="{{ url_for('blog.delete', post_id=post.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash"></i> 确认删除
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // 详情页应用代码高亮
+  document.querySelectorAll('.markdown-body pre code').forEach(el => {
+    if (window.hljs) hljs.highlightElement(el);
+  });
+</script>
+{% endblock %}

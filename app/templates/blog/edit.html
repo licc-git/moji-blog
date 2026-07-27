@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% block title %}
+  {{ '编辑笔记' if mode == 'edit' else '写新笔记' }} · {{ site_name }}
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h3 class="mb-0" style="font-family: var(--mo-serif);">
+    <i class="bi bi-pencil-square"></i>
+    {{ '编辑笔记' if mode == 'edit' else '写新笔记' }}
+  </h3>
+  <div class="editor-toolbar">
+    <div class="tool-group">
+      <button type="button" class="tool-btn" id="btn-upload-img" title="插入图片">
+        <i class="bi bi-image"></i> 图片
+      </button>
+      <button type="button" class="tool-btn" id="btn-upload-file" title="上传附件">
+        <i class="bi bi-paperclip"></i> 附件
+      </button>
+    </div>
+    <span class="tool-sep"></span>
+    <div class="tool-group">
+      <button type="button" class="tool-btn" data-insert="inline_code" title="行内代码 `code`"><i class="bi bi-code"></i></button>
+      <button type="button" class="tool-btn" data-insert="code_block" title="代码块"><i class="bi bi-code-square"></i></button>
+      <button type="button" class="tool-btn" data-insert="inline_math" title="行内公式 $x$">fx</button>
+      <button type="button" class="tool-btn" data-insert="block_math" title="块级公式 $$">公式</button>
+      <button type="button" class="tool-btn" id="btn-symbols" title="数学 / 希腊符号"><i class="bi bi-omega"></i> 符号</button>
+    </div>
+    <span class="tool-sep"></span>
+    <div class="tool-group">
+      <button type="button" class="tool-btn" data-insert="h2" title="二级标题"><i class="bi bi-type-h2"></i></button>
+      <button type="button" class="tool-btn" data-insert="quote" title="引用"><i class="bi bi-quote"></i></button>
+      <button type="button" class="tool-btn" data-insert="link" title="链接"><i class="bi bi-link-45deg"></i></button>
+      <button type="button" class="tool-btn" data-insert="table" title="表格"><i class="bi bi-table"></i></button>
+      <button type="button" class="tool-btn" data-insert="hr" title="分割线"><i class="bi bi-distribute-vertical"></i></button>
+    </div>
+    <span class="tool-sep"></span>
+    <div class="tool-group">
+      <button type="button" class="tool-btn" id="btn-toggle-ai" title="AI 助手">
+        <i class="bi bi-stars"></i> AI 助手
+      </button>
+    </div>
+  </div>
+</div>
+
+<form method="post" id="post-form" novalidate>
+  {{ form.hidden_tag() }}
+
+  {# 标题行 #}
+  <div class="row g-2 mb-3">
+    <div class="col-md-7">
+      {{ form.title(class="form-control", placeholder="给这篇笔记起个标题…") }}
+      {% for err in form.title.errors %}
+      <div class="text-danger small mt-1">{{ err }}</div>
+      {% endfor %}
+    </div>
+    <div class="col-md-3">
+      <div class="input-group">
+        {{ form.category_id(class="form-select") }}
+        <button type="button" class="btn btn-outline-secondary" id="btn-new-category"
+                title="新建分类" aria-label="新建分类">
+          <i class="bi bi-plus-lg"></i>
+        </button>
+      </div>
+    </div>
+    <div class="col-md-2 d-flex align-items-center">
+      <div class="form-check form-switch">
+        {{ form.is_published(class="form-check-input", id="is_published") }}
+        <label class="form-check-label small" for="is_published">发布</label>
+      </div>
+      <div class="form-check form-switch ms-2">
+        {{ form.is_pinned(class="form-check-input", id="is_pinned") }}
+        <label class="form-check-label small" for="is_pinned">置顶</label>
+      </div>
+    </div>
+  </div>
+
+  {# 标签 + 摘要 #}
+  <div class="row g-2 mb-3">
+    <div class="col-md-6">
+      {{ form.tags(class="form-control", placeholder="标签，逗号分隔：Python, Flask") }}
+    </div>
+    <div class="col-md-6">
+      {{ form.summary(class="form-control", placeholder="一句话摘要（可留空，可让 AI 生成）") }}
+    </div>
+  </div>
+
+  {# 左右分屏编辑器 #}
+  <div class="editor-shell">
+    <div class="editor-pane">
+      <div class="pane-head">
+        <span><i class="bi bi-code-square"></i> Markdown 输入</span>
+        <span>
+          <span class="text-muted small" id="char-count">0 字</span>
+          <span class="save-status" id="save-status"></span>
+        </span>
+      </div>
+      {{ form.content_md(class="editor-textarea", id="editor-textarea",
+                         placeholder="在此输入 Markdown 内容…  支持拖拽图片到此处上传") }}
+      {% for err in form.content_md.errors %}
+      <div class="text-danger small m-2">{{ err }}</div>
+      {% endfor %}
+    </div>
+    <div class="editor-pane">
+      <div class="pane-head">
+        <span><i class="bi bi-eye"></i> 实时预览</span>
+        <span class="text-muted small">渲染中…</span>
+      </div>
+      <div class="editor-preview markdown-body" id="editor-preview"></div>
+    </div>
+  </div>
+
+  {# 保存按钮 #}
+  <div class="d-flex justify-content-end gap-2 mt-3">
+    <a href="{{ url_for('blog.index') }}" class="btn btn-light">取消</a>
+    {{ form.submit(class="btn btn-primary") }}
+  </div>
+</form>
+
+{# ===== AI 助手面板（默认隐藏） ===== #}
+<div class="ai-panel" id="ai-panel" style="display:none;">
+  <div class="ai-head">
+    <i class="bi bi-stars"></i> AI 助手
+    <span class="float-end small" id="ai-provider-tag"></span>
+  </div>
+  <div class="ai-body">
+    <div class="ai-actions">
+      <button type="button" class="btn btn-sm btn-outline-primary" data-action="polish">
+        <i class="bi bi-magic"></i> 润色文章
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-primary" data-action="summary">
+        <i class="bi bi-card-text"></i> 生成摘要
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-primary" data-action="continue">
+        <i class="bi bi-arrow-return-right"></i> 续写
+      </button>
+    </div>
+    <div class="ai-result" id="ai-result"></div>
+    <div class="mt-2 d-flex gap-2" id="ai-actions-after" style="display:none !important;">
+      <button type="button" class="btn btn-sm btn-success" id="ai-apply">
+        <i class="bi bi-check2"></i> 采纳到正文
+      </button>
+      <button type="button" class="btn btn-sm btn-secondary" id="ai-append">
+        追加到末尾
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="ai-summary-fill">
+        填入摘要
+      </button>
+    </div>
+    <p class="text-muted small mt-2 mb-0">
+      提示：API Key 在服务端调用，不会暴露在浏览器。
+    </p>
+  </div>
+</div>
+
+{# 隐藏的文件上传 input #}
+<input type="file" id="hidden-file-input" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.7z,.txt,.md,.csv,.json,.yaml,.yml" hidden>
+
+{# ===== 符号面板（点击「符号」按钮切换显示） ===== #}
+<div class="symbol-palette" id="symbol-palette" hidden>
+  <div class="sym-group">
+    <span class="sym-title">希腊</span>
+    <button type="button" class="sym-btn" data-symbol="α">α</button>
+    <button type="button" class="sym-btn" data-symbol="β">β</button>
+    <button type="button" class="sym-btn" data-symbol="γ">γ</button>
+    <button type="button" class="sym-btn" data-symbol="δ">δ</button>
+    <button type="button" class="sym-btn" data-symbol="ε">ε</button>
+    <button type="button" class="sym-btn" data-symbol="θ">θ</button>
+    <button type="button" class="sym-btn" data-symbol="λ">λ</button>
+    <button type="button" class="sym-btn" data-symbol="μ">μ</button>
+    <button type="button" class="sym-btn" data-symbol="π">π</button>
+    <button type="button" class="sym-btn" data-symbol="σ">σ</button>
+    <button type="button" class="sym-btn" data-symbol="φ">φ</button>
+    <button type="button" class="sym-btn" data-symbol="ω">ω</button>
+    <button type="button" class="sym-btn" data-symbol="Δ">Δ</button>
+    <button type="button" class="sym-btn" data-symbol="Σ">Σ</button>
+    <button type="button" class="sym-btn" data-symbol="Ω">Ω</button>
+  </div>
+  <div class="sym-group">
+    <span class="sym-title">运算</span>
+    <button type="button" class="sym-btn" data-symbol="±">±</button>
+    <button type="button" class="sym-btn" data-symbol="×">×</button>
+    <button type="button" class="sym-btn" data-symbol="÷">÷</button>
+    <button type="button" class="sym-btn" data-symbol="√">√</button>
+    <button type="button" class="sym-btn" data-symbol="∞">∞</button>
+    <button type="button" class="sym-btn" data-symbol="∑">∑</button>
+    <button type="button" class="sym-btn" data-symbol="∏">∏</button>
+    <button type="button" class="sym-btn" data-symbol="∫">∫</button>
+    <button type="button" class="sym-btn" data-symbol="∂">∂</button>
+    <button type="button" class="sym-btn" data-symbol="∇">∇</button>
+  </div>
+  <div class="sym-group">
+    <span class="sym-title">关系</span>
+    <button type="button" class="sym-btn" data-symbol="≠">≠</button>
+    <button type="button" class="sym-btn" data-symbol="≤">≤</button>
+    <button type="button" class="sym-btn" data-symbol="≥">≥</button>
+    <button type="button" class="sym-btn" data-symbol="≈">≈</button>
+    <button type="button" class="sym-btn" data-symbol="≡">≡</button>
+    <button type="button" class="sym-btn" data-symbol="∈">∈</button>
+    <button type="button" class="sym-btn" data-symbol="∉">∉</button>
+    <button type="button" class="sym-btn" data-symbol="⊂">⊂</button>
+    <button type="button" class="sym-btn" data-symbol="⊆">⊆</button>
+    <button type="button" class="sym-btn" data-symbol="∝">∝</button>
+  </div>
+  <div class="sym-group">
+    <span class="sym-title">箭头</span>
+    <button type="button" class="sym-btn" data-symbol="→">→</button>
+    <button type="button" class="sym-btn" data-symbol="⇒">⇒</button>
+    <button type="button" class="sym-btn" data-symbol="↔">↔</button>
+    <button type="button" class="sym-btn" data-symbol="⇔">⇔</button>
+    <button type="button" class="sym-btn" data-symbol="↑">↑</button>
+    <button type="button" class="sym-btn" data-symbol="↓">↓</button>
+  </div>
+  <div class="sym-group">
+    <span class="sym-title">其他</span>
+    <button type="button" class="sym-btn" data-symbol="°">°</button>
+    <button type="button" class="sym-btn" data-symbol="§">§</button>
+    <button type="button" class="sym-btn" data-symbol="‰">‰</button>
+    <button type="button" class="sym-btn" data-symbol="★">★</button>
+    <button type="button" class="sym-btn" data-symbol="☆">☆</button>
+    <button type="button" class="sym-btn" data-symbol="✓">✓</button>
+    <button type="button" class="sym-btn" data-symbol="✗">✗</button>
+  </div>
+</div>
+
+{# ===== 新建分类模态框 ===== #}
+<div class="modal fade" id="newCatModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-folder-plus"></i> 新建分类</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label small text-muted">分类名称</label>
+          <input type="text" class="form-control" id="new-cat-name" placeholder="如：算法笔记" maxlength="64">
+        </div>
+        <div class="mb-2">
+          <label class="form-label small text-muted">描述（可选）</label>
+          <input type="text" class="form-control" id="new-cat-desc" placeholder="一句话描述" maxlength="256">
+        </div>
+        <div id="new-cat-error" class="text-danger small mt-2" style="display:none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="btn-save-category">
+          <i class="bi bi-check2"></i> 添加
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // 向 editor.js 注入后端路由 URL（静态 JS 无法使用 Jinja）
+  window.MO_EDITOR_CONFIG = {
+    previewUrl: "{{ url_for('blog.preview') }}",
+    uploadUrl: "{{ url_for('upload.upload') }}",
+    aiActionsUrl: "{{ url_for('ai.actions') }}",
+    aiAssistUrl: "{{ url_for('ai.assist') }}",
+    newCategoryUrl: "{{ url_for('blog.new_category') }}",
+  };
+</script>
+<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+{% endblock %}

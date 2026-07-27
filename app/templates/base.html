@@ -1,0 +1,181 @@
+{# 基础布局模板：引入 Bootstrap 5、highlight.js，定义导航与页脚 #}
+<!doctype html>
+<html lang="zh-CN" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site_name }}{% endblock %}</title>
+  <meta name="description" content="{{ site_tagline }}">
+
+  {# Bootstrap 5 #}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous">
+  {# Bootstrap Icons #}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  {# highlight.js 代码高亮 #}
+  <link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css"
+        rel="stylesheet">
+
+  {# 衬线 / 无衬线字体（编辑派主题） #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;500&display=swap"
+        rel="stylesheet">
+
+  {# 项目自定义样式 #}
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+  {# MathJax：公式渲染（$...$ 行内，$$...$$ 块级）；async 不阻塞页面 #}
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["$", "$"], ["\\(", "\\)"]],
+        displayMath: [["$$", "$$"], ["\\[", "\\]"]]
+      },
+      options: { skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"] }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+{# ===== 顶部导航 ===== #}
+<nav class="navbar navbar-expand-lg sticky-top site-navbar">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('blog.index') }}">
+      <span class="brand-mark">墨</span>
+      <span class="fw-semibold">{{ site_name }}</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false"
+            aria-label="切换导航">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('blog.index') }}">
+            <i class="bi bi-house-door"></i> 首页
+          </a>
+        </li>
+        {% if current_user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('blog.create') }}">
+            <i class="bi bi-pencil-square"></i> 写笔记
+          </a>
+        </li>
+        {% endif %}
+        {# 分类收纳进「更多」下拉，避免导航栏拥挤 #}
+        {% if nav_categories %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-collection"></i> 更多
+          </a>
+          <ul class="dropdown-menu shadow-sm">
+            {% for cat in nav_categories %}
+            <li>
+              <a class="dropdown-item d-flex justify-content-between align-items-center"
+                 href="{{ url_for('blog.index', category=cat.id) }}">
+                <span>{{ cat.name }}</span>
+                <span class="badge bg-secondary ms-2">{{ cat.post_count }}</span>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </li>
+        {% endif %}
+      </ul>
+
+      <ul class="navbar-nav align-items-lg-center">
+        {# 搜索框 #}
+        <li class="nav-item me-lg-2 mb-2 mb-lg-0">
+          <form class="d-flex" action="{{ url_for('blog.index') }}" method="get" role="search">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-transparent border-end-0">
+                <i class="bi bi-search"></i>
+              </span>
+              <input class="form-control border-start-0" type="search" name="q"
+                     placeholder="搜索笔记…" value="{{ request.args.get('q', '') }}"
+                     aria-label="搜索">
+            </div>
+          </form>
+        </li>
+        {% if current_user.is_authenticated %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#"
+             role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="avatar-circle">{{ current_user.username[0] | upper }}</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li><span class="dropdown-item-text small text-muted">
+              {{ current_user.username }}</span></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{{ url_for('blog.create') }}">
+              <i class="bi bi-pencil"></i> 新建笔记</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger"
+                   href="{{ url_for('auth.logout') }}">
+              <i class="bi bi-box-arrow-right"></i> 退出</a></li>
+          </ul>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('auth.login') }}">
+            <i class="bi bi-box-arrow-in-right"></i> 登录
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+{# ===== Flash 消息 ===== #}
+<div class="container mt-3">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category if category != 'message' else 'info' }}
+                  alert-dismissible fade show shadow-sm" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"
+                  aria-label="关闭"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+{# ===== 主体内容 ===== #}
+<main class="container py-4 flex-grow-1">
+  {% block content %}{% endblock %}
+</main>
+
+{# ===== 页脚 ===== #}
+<footer class="site-footer mt-auto">
+  <div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+      <span class="text-muted small">
+        <span class="fw-semibold">{{ site_name }}</span> · {{ site_tagline }}
+      </span>
+      <span class="text-muted small">
+        Powered by <a href="https://flask.palletsprojects.com/" target="_blank"
+          rel="noopener" class="footer-link">Flask</a>
+        &amp; <a href="https://getbootstrap.com/" target="_blank" rel="noopener"
+          class="footer-link">Bootstrap 5</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+{# 脚本 #}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

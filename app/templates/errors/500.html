@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}500 · 服务器开小差了{% endblock %}
+{% block content %}
+<div class="empty-state">
+  <i class="bi bi-exclamation-triangle" style="color:#d9534f;"></i>
+  <h3 class="mt-3">500 · 服务器开小差了</h3>
+  <p>服务遇到了一点问题，请稍后再试。</p>
+  <a href="{{ url_for('blog.index') }}" class="btn btn-primary mt-2">返回首页</a>
+</div>
+{% endblock %}
