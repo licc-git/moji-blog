@@ -336,6 +336,18 @@ main { flex: 1 0 auto; }       /* 主内容撑开，把页脚顶到底 */
 /* ============================================================
    详情页：文章头 + Markdown 排版
    ============================================================ */
+/* 返回列表：极简文字链接，不抢文章视觉 */
+.back-to-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 0.85rem;
+  color: var(--mo-ink-faint);
+  text-decoration: none;
+  margin-bottom: 1.2rem;
+  transition: color .15s;
+}
+.back-to-list:hover { color: var(--mo-accent); }   /* 悬停变赭石色 */
 .article-header {
   margin-bottom: 2rem;
   border-bottom: 1px solid var(--mo-border);
