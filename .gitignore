@@ -21,9 +21,11 @@ uploads/
 # 数据库迁移版本（保留目录结构）
 # migrations/versions/*.py
 
-# 运行时日志
+# 运行时日志与进程文件
 *.log
 instance/
+run/
+logs/
 
 # IDE
 .idea/

@@ -16,7 +16,7 @@ from __future__ import annotations
 import os
 
 from flask import Flask, render_template
-
+from dotenv import load_dotenv
 from app.config import get_config
 from app.extensions import db, login_manager, migrate, csrf
 
@@ -28,6 +28,8 @@ def create_app(config_name: str | None = None) -> Flask:
                         为空时读取 FLASK_ENV 环境变量
     :return: 配置完成的 Flask 应用
     """
+    load_dotenv()
+
     app = Flask(__name__, instance_relative_config=False)
     app.config.from_object(get_config(config_name))
 

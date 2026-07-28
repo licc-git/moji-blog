@@ -1,5 +1,5 @@
 [project]
-name = "my-blog"
+name = "moji-blog"
 version = "0.1.0"
 description = "一个基于 Flask 的精致单用户个人博客系统，记录学习笔记与日常随笔。"
 readme = "prompt.md"
@@ -18,11 +18,15 @@ dependencies = [
     "openai>=1.40",
     "email-validator>=2.2",
     "bleach>=6.1",
+    "gevent>=26.5.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "python-dotenv>=1.0",
+]
+prod = [
+    "gunicorn>=22.0",
 ]
 
 [tool.uv]
