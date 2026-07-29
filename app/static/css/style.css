@@ -938,3 +938,92 @@ main { flex: 1 0 auto; }       /* 主内容撑开，把页脚顶到底 */
   .post-card { height: 260px; }     /* 移动端略矮 */
   .blog-sidebar { position: static; } /* 取消 sticky，避免小屏遮挡 */
 }
+
+/* ============================================================
+   夜间模式 · Dark Theme
+   通过覆盖 --mo-* 变量实现，保留编辑/生活派的暖调质感。
+   触发方式：<html data-bs-theme="dark">（由 main.js 切换）。
+   Bootstrap 5.3 内置组件会根据 data-bs-theme 自动适配暗色。
+   ============================================================ */
+[data-bs-theme="dark"] {
+  --mo-ink: #e8e0d2;          /* 浅墨文字，暗底下保持柔和 */
+  --mo-ink-soft: #b5ab9a;     /* 次级文字 */
+  --mo-ink-faint: #8a8170;    /* 更弱文字 */
+  --mo-paper: #1a1612;        /* 主背景：深墨棕 */
+  --mo-paper-2: #221c16;      /* 区块底色 */
+  --mo-paper-3: #2a231c;      /* 更深纸色 */
+  --mo-card: #251f19;         /* 卡片底，比背景略亮 */
+  --mo-accent: #d4795a;       /* 赭石红提亮，暗底更醒目 */
+  --mo-accent-soft: #3a2820;  /* 赭石红浅底（chip、选中） */
+  --mo-accent-ink: #e89070;   /* 深赭 · hover */
+  --mo-warm: #d99a4a;         /* 暖金提亮 */
+  --mo-study: #7a9268;        /* 学习笔记标签 · 墨绿提亮 */
+  --mo-study-soft: #2a3322;
+  --mo-daily: #d4795a;        /* 日常随笔标签 · 赭石 */
+  --mo-daily-soft: #3a2820;
+  --mo-border: #3a3128;       /* 通用边框 */
+  --mo-rule: #4a3f33;         /* 分割线略深 */
+  --mo-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --mo-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* 夜间模式主体：复用 light 的布局，仅换底色与文字色 */
+[data-bs-theme="dark"] body {
+  background-color: var(--mo-paper);
+  color: var(--mo-ink);
+}
+
+/* 夜间背景第 2 层：光晕颜色提亮、加深对比，营造夜间氛围 */
+[data-bs-theme="dark"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(620px 420px at 10% 6%,  rgba(212, 121, 90, 0.15), transparent 60%),
+    radial-gradient(540px 400px at 90% 14%, rgba(217, 154, 74, 0.12), transparent 62%),
+    radial-gradient(600px 460px at 78% 96%, rgba(122, 146, 104, 0.10), transparent 60%);
+  filter: blur(36px);
+}
+
+/* 夜间背景第 3 层：网格改用浅色细线，在暗底上若隐若现 */
+[data-bs-theme="dark"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(232, 224, 210, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 224, 210, 0.04) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* 夜间导航栏：半透明深墨底（覆盖 light 下硬编码的纸色 rgba） */
+[data-bs-theme="dark"] .site-navbar {
+  background: rgba(26, 22, 18, 0.85);
+  border-bottom-color: var(--mo-border);
+}
+
+/* 夜间表格条纹：改用白色低透明度（覆盖 light 下硬编码的纸色 rgba） */
+[data-bs-theme="dark"] .markdown-body tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* 主题切换按钮：圆形图标按钮，适配导航栏 */
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1rem;
+  line-height: 1;
+}
+.theme-toggle:hover {
+  color: var(--mo-accent);
+  border-color: var(--mo-accent);
+}

@@ -53,9 +53,38 @@
     });
   }
 
+  /* ---------- 主题切换（日间/夜间）----------
+     通过 <html data-bs-theme> 切换，CSS 变量自动适配。
+     localStorage 持久化，首次访问跟随系统偏好（防闪烁脚本在 base.html 已处理）。
+     图标约定：日间显示月亮（点击切到夜间），夜间显示太阳（点击切回日间）。
+  */
+  function setupThemeToggle() {
+    var btn = document.getElementById("themeToggle");
+    if (!btn) return;
+    var icon = btn.querySelector("i");
+
+    // 根据当前主题同步图标
+    function syncIcon() {
+      var theme = document.documentElement.getAttribute("data-bs-theme");
+      icon.className = theme === "dark" ? "bi bi-sun" : "bi bi-moon-stars";
+      btn.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+    }
+
+    syncIcon();
+
+    btn.addEventListener("click", function () {
+      var current = document.documentElement.getAttribute("data-bs-theme");
+      var next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-bs-theme", next);
+      localStorage.setItem("moji-theme", next);
+      syncIcon();
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     highlightNav();
     autoDismissAlerts();
     setupFilterDblClickClear();
+    setupThemeToggle();
   });
 })();

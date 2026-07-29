@@ -16,7 +16,7 @@ db = SQLAlchemy()
 
 # 登录管理
 login_manager = LoginManager()
-login_manager.login_view = "auth.login"
+login_manager.login_view = "auth.login"  # type: ignore
 login_manager.login_message = "请先登录后再进行此操作。"
 login_manager.login_message_category = "warning"
 

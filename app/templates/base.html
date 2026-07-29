@@ -4,6 +4,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  {# 防闪烁：在首次渲染前应用已保存的主题，避免页面加载瞬间出现亮色闪烁 #}
+  <script>
+    (function () {
+      var saved = localStorage.getItem('moji-theme');
+      if (!saved) {
+        saved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-bs-theme', saved);
+    })();
+  </script>
   <title>{% block title %}{{ site_name }}{% endblock %}</title>
   <meta name="description" content="{{ site_tagline }}">
 
@@ -89,6 +99,13 @@
       </ul>
 
       <ul class="navbar-nav align-items-lg-center">
+        {# 主题切换：日间/夜间 #}
+        <li class="nav-item me-lg-2 mb-2 mb-lg-0">
+          <button type="button" class="btn btn-sm btn-outline-secondary theme-toggle"
+                  id="themeToggle" aria-label="切换主题" title="切换夜间/日间模式">
+            <i class="bi bi-moon-stars"></i>
+          </button>
+        </li>
         {# 搜索框 #}
         <li class="nav-item me-lg-2 mb-2 mb-lg-0">
           <form class="d-flex" action="{{ url_for('blog.index') }}" method="get" role="search">
