@@ -71,7 +71,7 @@
         </li>
         {% if current_user.is_authenticated %}
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('blog.create') }}">
+          <a class="nav-link" href="{{ url_for('blog.create') }}" target="_blank" rel="noopener">
             <i class="bi bi-pencil-square"></i> 写笔记
           </a>
         </li>
@@ -129,7 +129,7 @@
             <li><span class="dropdown-item-text small text-muted">
               {{ current_user.username }}</span></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="{{ url_for('blog.create') }}">
+            <li><a class="dropdown-item" href="{{ url_for('blog.create') }}" target="_blank" rel="noopener">
               <i class="bi bi-pencil"></i> 新建笔记</a></li>
             <li><a class="dropdown-item" href="{{ url_for('blog.drafts') }}">
               <i class="bi bi-file-earmark-text"></i> 草稿箱</a></li>
