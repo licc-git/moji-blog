@@ -95,6 +95,32 @@ def index():
     )
 
 
+@blog_bp.route("/drafts")
+@login_required
+def drafts():
+    """草稿箱：未发布的笔记列表（仅登录用户可见）。"""
+    page = request.args.get("page", 1, type=int)
+    pagination = (
+        Post.query.filter_by(is_published=False)
+        .order_by(Post.created_at.desc())
+        .paginate(page=page, per_page=9, error_out=False)
+    )
+    return render_template(
+        "blog/index.html",
+        posts=pagination.items,
+        pagination=pagination,
+        categories=[],
+        current_category=None,
+        keyword="",
+        tag_cloud=[],
+        archives=[],
+        current_tag="",
+        current_year=None,
+        current_month=None,
+        draft_mode=True,
+    )
+
+
 @blog_bp.route("/post/<int:post_id>")
 @blog_bp.route("/post/<int:post_id>-<slug>")
 def detail(post_id, slug=None):

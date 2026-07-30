@@ -32,8 +32,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;500&display=swap"
         rel="stylesheet">
 
-  {# 项目自定义样式 #}
-  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+  {# 项目自定义样式（v 参数用于破坏浏览器缓存） #}
+  <link href="{{ url_for('static', filename='css/style.css') }}?v=3" rel="stylesheet">
 
   {# MathJax：公式渲染（$...$ 行内，$$...$$ 块级）；async 不阻塞页面 #}
   <script>
@@ -131,6 +131,8 @@
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="{{ url_for('blog.create') }}">
               <i class="bi bi-pencil"></i> 新建笔记</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('blog.drafts') }}">
+              <i class="bi bi-file-earmark-text"></i> 草稿箱</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item text-danger"
                    href="{{ url_for('auth.logout') }}">
@@ -191,7 +193,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}?v=2"></script>
 
 {% block scripts %}{% endblock %}
 </body>

@@ -475,6 +475,42 @@
     }
   });
 
+  /* Tab 键缩进：在编辑器内按 Tab 插入 2 空格（非切换焦点），符合 Markdown 习惯。
+     - 无选区：光标处插入 2 空格
+     - 有选区：选中每行行首加 2 空格（批量缩进）
+     - Shift+Tab：选中每行行首去掉 2 空格（反缩进） */
+  textarea.addEventListener("keydown", function (e) {
+    if (e.key !== "Tab") return;
+    e.preventDefault();
+    var start = this.selectionStart;
+    var end = this.selectionEnd;
+    var value = this.value;
+
+    if (e.shiftKey) {
+      // 反缩进：选中区涉及的每行去掉行首 1~2 个空格
+      var lineStart = value.lastIndexOf("\n", start - 1) + 1;
+      var segment = value.slice(lineStart, end);
+      var replaced = segment.replace(/^ {1,2}/gm, "");
+      this.value = value.slice(0, lineStart) + replaced + value.slice(end);
+      this.selectionStart = lineStart;
+      this.selectionEnd = lineStart + replaced.length;
+    } else if (start !== end) {
+      // 有选区：每行行首加 2 空格
+      var lineStart = value.lastIndexOf("\n", start - 1) + 1;
+      var segment = value.slice(lineStart, end);
+      var replaced = segment.replace(/^/gm, "  ");
+      this.value = value.slice(0, lineStart) + replaced + value.slice(end);
+      this.selectionStart = lineStart;
+      this.selectionEnd = lineStart + replaced.length;
+    } else {
+      // 无选区：光标处插入 2 空格
+      this.value = value.slice(0, start) + "  " + value.slice(end);
+      this.selectionStart = this.selectionEnd = start + 2;
+    }
+    dirty = true;
+    schedulePreview();
+  });
+
   /* 保存按钮提交 → AJAX 保存（不跳转页面） */
   form.addEventListener("submit", function (e) {
     e.preventDefault();

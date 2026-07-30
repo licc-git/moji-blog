@@ -970,7 +970,11 @@ main { flex: 1 0 auto; }       /* 主内容撑开，把页脚顶到底 */
 /* 夜间模式主体：复用 light 的布局，仅换底色与文字色 */
 [data-bs-theme="dark"] body {
   background-color: var(--mo-paper);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   color: var(--mo-ink);
+  font-family: var(--mo-font);
 }
 
 /* 夜间背景第 2 层：光晕颜色提亮、加深对比，营造夜间氛围 */
@@ -1004,6 +1008,11 @@ main { flex: 1 0 auto; }       /* 主内容撑开，把页脚顶到底 */
 [data-bs-theme="dark"] .site-navbar {
   background: rgba(26, 22, 18, 0.85);
   border-bottom-color: var(--mo-border);
+}
+
+/* 夜间页脚：半透明深墨底（覆盖 light 下硬编码的纸色 rgba） */
+[data-bs-theme="dark"] .site-footer {
+  background: rgba(34, 28, 22, 0.6);
 }
 
 /* 夜间表格条纹：改用白色低透明度（覆盖 light 下硬编码的纸色 rgba） */

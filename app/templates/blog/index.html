@@ -2,14 +2,17 @@
 {% block title %}{{ site_name }} · {{ site_tagline }}{% endblock %}
 
 {% block content %}
-{# ===== 英雄区 ===== #}
+{# ===== 英雄区（草稿模式显示"草稿箱"标题） ===== #}
 <section class="hero">
-  <h1>{{ site_name }}</h1>
+  <h1>{{ '草稿箱' if draft_mode else site_name }}</h1>
+  {% if not draft_mode %}
   <p class="lead">{{ site_tagline }} —— 一方记录学习与生活的自留地。</p>
   <div class="hero-deco"></div>
+  {% endif %}
 </section>
 
-{# ===== 分类筛选 ===== #}
+{# ===== 分类筛选（草稿模式隐藏） ===== #}
+{% if not draft_mode %}
 <div class="filter-bar">
   <a class="filter-chip {% if not current_category %}active{% endif %}"
      href="{{ url_for('blog.index') }}">全部</a>
@@ -21,6 +24,7 @@
   </a>
   {% endfor %}
 </div>
+{% endif %}
 
 {# ===== 筛选提示（轻量，非丑框） ===== #}
 {% if current_tag or current_year %}
@@ -76,8 +80,8 @@
       {% endfor %}
     </div>
 
-    {# ===== 分页（链接保留当前筛选参数） ===== #}
-    {% if pagination.pages > 1 %}
+    {# ===== 分页（链接保留当前筛选参数；草稿模式不分页） ===== #}
+    {% if pagination and pagination.pages > 1 %}
     <nav class="mo-pagination">
       {% if pagination.has_prev %}
       <a href="{{ url_for('blog.index', page=pagination.prev_num, category=current_category.id if current_category, q=keyword, tag=current_tag, year=current_year, month=current_month) }}">
@@ -156,12 +160,19 @@
 {# ===== 空状态 ===== #}
 <div class="empty-state">
   <i class="bi bi-journal-text"></i>
-  <h4 class="mt-3">还没有笔记</h4>
+  <h4 class="mt-3">{{ '没有草稿' if draft_mode else '还没有笔记' }}</h4>
+  {% if draft_mode %}
+  <p>所有笔记都已发布，或去写一篇新的草稿吧。</p>
+  <a href="{{ url_for('blog.create') }}" class="btn btn-primary mt-2">
+    <i class="bi bi-pencil-square"></i> 写新笔记
+  </a>
+  {% else %}
   <p>开始记录你的第一篇学习笔记或日常随笔吧。</p>
   {% if current_user.is_authenticated %}
   <a href="{{ url_for('blog.create') }}" class="btn btn-primary mt-2">
     <i class="bi bi-pencil-square"></i> 写第一篇
   </a>
+  {% endif %}
   {% endif %}
 </div>
 {% endif %}
