@@ -58,8 +58,7 @@
             {# 标题用 stretched-link 让整张卡片可点击；不能再用 <a> 包整张卡，否则与标签链接嵌套 <a> 冲突 #}
             <h3 class="card-title">
               <a href="{{ url_for('blog.detail', post_id=post.id) }}"
-                 class="stretched-link text-reset text-decoration-none"
-                 target="_blank" rel="noopener">{{ post.title }}</a>
+                 class="stretched-link text-reset text-decoration-none">{{ post.title }}</a>
             </h3>
             <p class="card-summary">
               {% if post.summary %}{{ post.summary }}
