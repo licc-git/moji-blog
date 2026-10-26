@@ -1,0 +1,12 @@
+.git/
+.gitignore
+.venv/
+__pychche__/
+
+# .env
+run/
+uploads/
+logs/
+
+prompt.md
+.vscode/

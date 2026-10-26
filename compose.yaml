@@ -1,0 +1,46 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql8
+    environment:
+      MYSQL_ROOT_PASSWORD: "Root!Pass2026"
+      MYSQL_DATABASE: my_blog
+      MYSQL_USER: bloguser
+      MYSQL_PASSWORD: "Blog!Pass2026"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pRoot!Pass2026"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+  web:
+    build: .
+    image: moji-blog:1.0
+    container_name: moji-blog
+    env_file:
+      - .env
+    environment:
+      FLASK_ENV: production
+      SECRET_KEY: "0iXFIwhp7+xX6qXTdTuZEGyP8Vp0zJl3"
+      DATABASE_URL: "mysql+pymysql://bloguser:Blog!Pass2026@mysql:3306/my_blog?charset=utf8mb4"
+    depends_on:
+      mysql:
+        condition: service_healthy
+  nginx:
+    image: nginx:1.30
+    container_name: nginx1
+    ports:
+      - "5099:5099"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - web
+
+volumes:
+  mysql-data:
+
+networks:
+  default:
+    name: blog-net
