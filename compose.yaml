@@ -25,6 +25,7 @@ services:
       FLASK_ENV: production
       SECRET_KEY: "0iXFIwhp7+xX6qXTdTuZEGyP8Vp0zJl3"
       DATABASE_URL: "mysql+pymysql://bloguser:Blog!Pass2026@mysql:3306/my_blog?charset=utf8mb4"
+      SESSION_COOKIE_SECURE: false
     depends_on:
       mysql:
         condition: service_healthy

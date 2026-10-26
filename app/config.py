@@ -107,7 +107,7 @@ class ProductionConfig(Config):
     """生产环境配置。"""
 
     DEBUG = False
-    SESSION_COOKIE_SECURE = True  # 仅 HTTPS 传输
+    SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "true").lower() in ("1", "true", "yes")
 
 
 class TestingConfig(Config):
